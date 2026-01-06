@@ -1,0 +1,17 @@
+# 基于心理咨询师数字孪生数据集的Qwen3-4B微调项目依赖
+
+# 核心依赖
+torch>=2.0.0
+transformers>=4.51.0  # 重要：必须 >= 4.51.0 以支持 Qwen3
+datasets>=2.0.0
+peft>=0.3.0
+accelerate>=0.20.0
+
+# 工具依赖
+tqdm
+
+# 可选依赖（如果需要使用 CUDA）
+# 请根据你的 CUDA 版本安装对应的 PyTorch
+# 例如 CUDA 12.1:
+# torch>=2.0.0+cu121 --index-url https://download.pytorch.org/whl/cu121
+

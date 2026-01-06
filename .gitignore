@@ -1,0 +1,75 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+env/
+venv/
+ENV/
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+MANIFEST
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
+
+# Jupyter Notebook
+.ipynb_checkpoints
+
+# Model files (too large for GitHub)
+*.safetensors
+*.bin
+*.pt
+*.pth
+*.ckpt
+*.h5
+*.pkl
+model_origin/Qwen3-4B/
+training/qwen-psy-trained/
+training/qwen-psy-training/
+
+# Dataset files (too large)
+# 只排除大的数据集文件，保留小的配置文件
+data/PsyDTCorpus/PsyDTCorpus_train_mulit_turn_packing.json
+data/PsyDTCorpus/PsyDTCorpus_test_single_turn_split.json
+benchmark/PsychCounsel-Bench.json
+
+# Logs and outputs
+logs/
+*.log
+outputs/
+results/
+wandb/
+
+# Checkpoints
+checkpoints/
+*.ckpt
+
+# Environment variables
+.env
+.env.local
+
+# Temporary files
+*.tmp
+*.temp
+.cache/
+

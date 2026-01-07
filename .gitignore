@@ -42,16 +42,35 @@ MANIFEST
 *.pth
 *.ckpt
 *.h5
-*.pkl
+
+# 原始模型目录（包含大文件）
 model_origin/Qwen3-4B/
-training/qwen-psy-trained/
-training/qwen-psy-training/
+
+# LoRA 训练输出（包含大文件）
+lora/training/qwen-psy-trained/
+lora/training/qwen-psy-training/
+
+# 训练过程中的大文件
+*.optimizer.pt
+optimizer.pt
+scheduler.pt
+rng_state.pth
+scaler.pt
+training_args.bin
 
 # Dataset files (too large)
 # 只排除大的数据集文件，保留小的配置文件
-data/PsyDTCorpus/PsyDTCorpus_train_mulit_turn_packing.json
-data/PsyDTCorpus/PsyDTCorpus_test_single_turn_split.json
-benchmark/PsychCounsel-Bench.json
+lora/data/PsyDTCorpus/PsyDTCorpus_train_mulit_turn_packing.json
+lora/data/PsyDTCorpus/PsyDTCorpus_test_single_turn_split.json
+lora/benchmark/PsychCounsel-Bench.json
+
+# RAG 知识库 PDF 文件（版权问题，不上传）
+rag/knowledge_base/*.pdf
+
+# RAG 向量存储（大文件，可通过索引脚本重新生成）
+rag/vector_store/
+*.faiss
+*.pkl
 
 # Logs and outputs
 logs/
@@ -62,7 +81,6 @@ wandb/
 
 # Checkpoints
 checkpoints/
-*.ckpt
 
 # Environment variables
 .env
@@ -71,5 +89,13 @@ checkpoints/
 # Temporary files
 *.tmp
 *.temp
+
+# 大的 tokenizer 文件（某些 tokenizer.json 文件可能很大）
+# tokenizer.json 通常需要保留，但如果特别大可以取消注释下面这行
+# tokenizer.json
+
+# Cache directories
 .cache/
+huggingface/
+transformers_cache/
 

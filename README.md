@@ -1,4 +1,14 @@
-# 基于心理咨询师数字孪生数据集的Qwen3-4B微调项目
+<div align="center">
+
+# Qwen3-4B Fine-tuning for Psychological Counseling with RAG
+
+**基于心理咨询师数字孪生数据集的Qwen3-4B微调项目**
+
+[English](README_EN.md) | [中文](README.md)
+
+</div>
+
+---
 
 ## 📖 项目简介
 

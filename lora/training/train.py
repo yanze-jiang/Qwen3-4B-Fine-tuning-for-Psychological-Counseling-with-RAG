@@ -5,8 +5,9 @@ from datasets import load_dataset
 from peft import get_peft_model, LoraConfig, TaskType
 from transformers import DataCollatorForLanguageModeling
 
-# 设置本地模型路径
-model_path = "/root/.cache/modelscope/hub/models/Qwen/Qwen3-4B"
+# 设置模型路径（可以使用 HuggingFace 模型名称或本地路径）
+# 如果本地有缓存，会自动使用；否则会从 HuggingFace 下载
+model_path = "Qwen/Qwen3-4B"  # 或改为本地路径，如 "../../model_origin/Qwen3-4B"
 
 print("加载分词器...")
 # 加载分词器
@@ -29,9 +30,10 @@ model = AutoModelForCausalLM.from_pretrained(
 )
 
 print("加载数据集...")
-# 加载数据集 - 保持原有的key
-train_data = load_dataset("json", data_files="/root/autodl-tmp/PsyDTCorpus/PsyDTCorpus/train.json")
-test_data = load_dataset("json", data_files="/root/autodl-tmp/PsyDTCorpus/PsyDTCorpus/test.json")
+# 加载数据集 - 使用相对路径
+# 根据实际数据集文件位置调整路径
+train_data = load_dataset("json", data_files="../data/PsyDTCorpus/PsyDTCorpus_train_mulit_turn_packing.json")
+test_data = load_dataset("json", data_files="../data/PsyDTCorpus/PsyDTCorpus_test_single_turn_split.json")
 
 print(f"训练集大小: {len(train_data['train'])}")
 print(f"测试集大小: {len(test_data['train'])}")

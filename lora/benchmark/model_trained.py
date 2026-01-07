@@ -6,9 +6,9 @@ from peft import PeftModel
 import re
 
 # ================= 配置 =================
-BASE_MODEL_PATH = "/root/.cache/modelscope/hub/models/Qwen/Qwen3-4B"
-LORA_PATH = "/root/autodl-tmp/qwen-psy-trained"
-BENCHMARK_PATH = "/root/autodl-tmp/PsychCounsel-Bench.json"
+BASE_MODEL_PATH = "Qwen/Qwen3-4B"  # 或改为本地路径，如 "../../model_origin/Qwen3-4B"
+LORA_PATH = "../training/qwen-psy-trained"  # 微调后的 LoRA 适配器路径
+BENCHMARK_PATH = "./PsychCounsel-Bench.json"  # 基准测试数据集
 MAX_NEW_TOKENS = 50
 # ========================================
 

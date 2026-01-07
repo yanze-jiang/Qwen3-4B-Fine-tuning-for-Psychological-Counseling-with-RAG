@@ -5,8 +5,8 @@ from rag.retrieval import PsyRetriever
 import os
 
 # --- 路径配置 ---
-BASE_MODEL_PATH = "/root/.cache/modelscope/hub/models/Qwen/Qwen3-4B"
-LORA_PATH = "/root/autodl-tmp/qwen-psy-trained"
+BASE_MODEL_PATH = "Qwen/Qwen3-4B"  # 或改为本地路径，如 "../model_origin/Qwen3-4B"
+LORA_PATH = "../lora/training/qwen-psy-trained"  # LoRA 适配器路径
 
 class ComparisonExperiment:
     def __init__(self):

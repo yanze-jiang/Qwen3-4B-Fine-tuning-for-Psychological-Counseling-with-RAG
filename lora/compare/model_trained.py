@@ -1,34 +1,41 @@
 # local_qwen_inference.py
 import torch
 from transformers import AutoModelForCausalLM, AutoTokenizer
+from peft import PeftModel
 import os
 
 def main():
-    # ✅ 微调后的模型路径
-    model_path = "/root/autodl-tmp/qwen-psy-trained"
+    # ✅ 微调后的模型路径（LoRA 适配器）
+    base_model_path = "Qwen/Qwen3-4B"  # 基座模型路径
+    lora_path = "../training/qwen-psy-trained"  # LoRA 适配器路径
     
-    if not os.path.exists(model_path):
-        print(f"❌ 模型路径不存在: {model_path}")
+    if not os.path.exists(lora_path):
+        print(f"❌ LoRA 适配器路径不存在: {lora_path}")
         return
     
-    print(f"📁 使用微调后的模型路径: {model_path}")
+    print(f"📁 使用基座模型: {base_model_path}")
+    print(f"📁 使用 LoRA 适配器: {lora_path}")
     print("正在加载分词器和模型...")
     
     try:
         tokenizer = AutoTokenizer.from_pretrained(
-            model_path,
+            base_model_path,
             trust_remote_code=True
         )
         
         if tokenizer.pad_token is None:
             tokenizer.pad_token = tokenizer.eos_token
         
-        model = AutoModelForCausalLM.from_pretrained(
-            model_path,
+        # 先加载基座模型
+        base_model = AutoModelForCausalLM.from_pretrained(
+            base_model_path,
             torch_dtype=torch.float16,
             device_map="auto",
             trust_remote_code=True
         )
+        
+        # 然后加载 LoRA 适配器
+        model = PeftModel.from_pretrained(base_model, lora_path)
         
         model.eval()
         

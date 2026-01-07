@@ -5,9 +5,9 @@ from transformers import AutoModelForCausalLM, AutoTokenizer
 import re
 
 # ================= 配置 =================
-BASE_MODEL_PATH = "/root/.cache/modelscope/hub/models/Qwen/Qwen3-4B"
-LORA_PATH = "/root/autodl-tmp/qwen-psy-trained"  # 保留但不使用
-BENCHMARK_PATH = "/root/autodl-tmp/PsychCounsel-Bench.json"
+BASE_MODEL_PATH = "Qwen/Qwen3-4B"  # 或改为本地路径，如 "../../model_origin/Qwen3-4B"
+LORA_PATH = "../training/qwen-psy-trained"  # 保留但不使用（原始模型评估）
+BENCHMARK_PATH = "./PsychCounsel-Bench.json"  # 基准测试数据集
 MAX_NEW_TOKENS = 50
 # ========================================
 

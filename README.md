@@ -18,7 +18,7 @@
 PsyDTCorpus/
 ├── model_origin/            # 原始模型相关
 │   ├── Qwen3-4B/           # Qwen3-4B 模型文件
-│   └── generate_text.py    # 文本生成脚本
+│   └── generate_text.py    # 文本生成脚本，试着调用原始模型
 ├── lora/                    # LoRA 微调模块
 │   ├── data/                # 数据集目录
 │   │   ├── PsyDTCorpus/    # PsyDTCorpus 数据集

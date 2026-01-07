@@ -5,8 +5,8 @@ import sys
 import os
 
 def main():
-    # ✅ 服务器上的模型路径（AutoDL）
-    model_path = "/root/.cache/modelscope/hub/models/Qwen/Qwen3-4B"
+    # ✅ 模型路径（可以使用 HuggingFace 模型名称或本地路径）
+    model_path = "Qwen/Qwen3-4B"  # 或改为本地路径，如 "../../model_origin/Qwen3-4B"
     
     if not os.path.exists(model_path):
         print(f"❌ 错误: 模型路径不存在: {model_path}")

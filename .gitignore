@@ -99,3 +99,4 @@ checkpoints/
 huggingface/
 transformers_cache/
 
+lora/data/PsyDTCorpus/dataset_infos.json

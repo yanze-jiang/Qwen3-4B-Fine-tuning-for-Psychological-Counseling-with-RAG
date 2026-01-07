@@ -15,3 +15,11 @@ tqdm
 # 例如 CUDA 12.1:
 # torch>=2.0.0+cu121 --index-url https://download.pytorch.org/whl/cu121
 
+# RAG 相关依赖（如果使用 RAG 功能）
+langchain>=0.1.0
+langchain-community>=0.0.20
+langchain-huggingface>=0.0.1
+faiss-cpu>=1.7.4
+# faiss-gpu>=1.7.4  # 或使用 GPU 版本（如果有 GPU）
+pypdf>=3.0.0
+

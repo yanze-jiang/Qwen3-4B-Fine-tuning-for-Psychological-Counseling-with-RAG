@@ -1,6 +1,6 @@
 <div align="center">
 
-# Qwen3-4B Fine-tuning for Psychological Counseling with RAG
+# Enhancing a Small Domain-Specific LLM for Psychological Counseling via LoRA Style Alignment and RAG Knowledge Grounding
 
 **基于心理咨询师数字孪生数据集的Qwen3-4B微调项目**
 
@@ -12,7 +12,19 @@
 
 ## 📖 项目简介
 
-本项目基于 Qwen3-4B 模型，使用 LoRA 技术对心理咨询师数字孪生数据集（PsyDTCorpus）进行微调，旨在构建专业的心理咨询对话模型。项目集成了 RAG（检索增强生成）技术，结合专业知识库（包含5本心理学专业书籍），可以检索相关专业知识来增强模型回复的专业性和准确性。项目包含完整的训练、评估和对比功能，适用于心理咨询领域的对话生成任务。
+本项目基于 Qwen3-4B 模型，使用 LoRA（参数高效微调）在 PsyDTCorpus（心理咨询师数字孪生多轮对话数据集）上进行 SFT 风格对齐，并结合 RAG（检索增强生成）将外部专业知识注入系统提示词，从而在资源受限条件下提升心理咨询对话的共情表达、用户自主性与知识可靠性。项目包含训练、基准评测（PsychCounsel-Bench）、以及 Base / LoRA / LoRA+RAG 三配置对比脚本，适用于心理咨询领域的对话生成与专业知识问答。
+
+## 📌 论文式总结（面向实习/展示研究能力）
+
+- **Base 模型**：`Qwen/Qwen3-4B`
+- **SFT + LoRA（风格对齐）**：`r=8`，`alpha=32`，`dropout=0.1`，`target_modules=["q_proj","k_proj","v_proj","o_proj"]`；`max_length=384`；3 epochs；LR=2e-4；有效 batch=8
+- **RAG（知识落地）**：5 本中文心理学/伦理/诊断参考资料；chunk_size=300，overlap=40；Embedding=`BAAI/bge-small-zh-v1.5`；FAISS；top-1 检索并注入 system prompt
+- **定量评测（PsychCounsel-Bench，500 道心理学选择题）**：
+  - 专业提示词：Base 80.60% (403/500)；LoRA 79.60% (398/500)
+  - 简单提示词：Base 46.20% (231/500)；LoRA 57.20% (286/500)（**+11.00pp**）
+- **硬件（复现信息）**：单卡 RTX 4090D；对比示例中 Base 显存 7.49GB，LoRA 7.50GB（适配器开销约 590 万参数，约 0.15%）
+
+> 注：`rag/knowledge_base/*.pdf` 与 `rag/vector_store/` 在 `.gitignore` 中默认不提交，请按说明在本地准备 PDF 并先运行 `rag/indexing.py` 构建向量索引。
 
 ## 🎯 项目特点
 
@@ -27,8 +39,7 @@
 ```
 PsyDTCorpus/
 ├── model_origin/            # 原始模型相关
-│   ├── Qwen3-4B/           # Qwen3-4B 模型文件
-│   └── generate_text.py    # 文本生成脚本，试着调用原始模型
+│   └── generate_text.py    # 文本生成脚本（原始模型调用示例）
 ├── lora/                    # LoRA 微调模块
 │   ├── data/                # 数据集目录
 │   │   ├── PsyDTCorpus/    # PsyDTCorpus 数据集
@@ -48,13 +59,11 @@ PsyDTCorpus/
     ├── retrieval.py        # 知识检索器
     ├── compare_all.py      # 三种模型对比脚本
     ├── knowledge_base/     # 专业知识库（PDF 文件）
-    │   ├── CCMD-3中国精神障碍分类与诊断标准.pdf
-    │   ├── 中国心理学会临床与咨询心理学工作伦理守则解读.pdf
-    │   ├── 国家职业资格培训教程 心理咨询师 三级.pdf
-    │   ├── 心理咨询的理论与实务.pdf
-    │   └── 认知疗法基础与应用.pdf
     └── vector_store/       # 向量存储目录
         └── psychology_db/  # FAISS 向量数据库
+└── stats/                   # 数据集统计脚本（论文附录用）
+    ├── topic_distribution.py
+    └── conversation_statistics.py
 ```
 
 ## 🔧 环境要求
@@ -113,6 +122,29 @@ pip install torch transformers>=4.51.0 datasets peft accelerate tqdm
 数据集应放置在 `data/PsyDTCorpus/` 目录下，包含以下文件：
 - `PsyDTCorpus_train_mulit_turn_packing.json` - 训练集
 - `PsyDTCorpus_test_single_turn_split.json` - 测试集
+
+### 数据集统计（训练集）
+
+以下统计由 `stats/topic_distribution.py` 与 `stats/conversation_statistics.py` 计算得到（字符数为 Python `len()` 的字符长度）：
+
+- **样本数**：4760 条多轮对话（训练集）
+- **主题分布（normalizedTag）**：
+  - 婚恋 1012（21.26%）
+  - 情绪 658（13.82%）
+  - 人际 648（13.61%）
+  - 家庭 510（10.71%）
+  - 治疗 485（10.19%）
+  - 成长 374（7.86%）
+  - 自我 360（7.56%）
+  - 行为 350（7.35%）
+  - 职场 153（3.21%）
+  - 社会 120（2.52%）
+  - 性心理 56（1.18%）
+  - 心理学知识 34（0.71%）
+- **对话轮次**：平均 37.16；中位数 37；最小 19；最大 71
+- **字数（字符）**：
+  - user 平均 31.54；总计 2,714,230（占比 35.22%）
+  - assistant 平均 58.02；总计 4,993,118（占比 64.78%）
 
 ### 数据集格式
 
@@ -848,6 +880,13 @@ E. Unstable factors
    - 向量索引会保存在 `rag/vector_store/psychology_db/` 目录
    - 如果知识库更新，需要重新运行索引构建脚本
    - RAG 依赖（langchain, faiss 等）是可选的，仅在需要使用 RAG 功能时安装
+
+8. **RAG 知识库文件（本地准备，不随仓库提交）**：
+   - CCMD-3（中国精神障碍分类与诊断标准第3版）
+   - 中国心理学会临床与咨询心理学工作伦理守则解读
+   - 国家职业资格培训教程：心理咨询师（三级，2012 修订版）
+   - 心理咨询的理论与实务
+   - 认知疗法基础与应用（第2版）
 
 ## 📄 许可证
 

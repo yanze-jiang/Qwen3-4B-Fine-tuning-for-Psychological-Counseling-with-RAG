@@ -1,6 +1,6 @@
 <div align="center">
 
-# Qwen3-4B Fine-tuning for Psychological Counseling with RAG
+# Enhancing a Small Domain-Specific LLM for Psychological Counseling via LoRA Style Alignment and RAG Knowledge Grounding
 
 **基于心理咨询师数字孪生数据集的Qwen3-4B微调项目**
 
@@ -12,7 +12,19 @@
 
 ## 📖 Project Overview
 
-This project fine-tunes the Qwen3-4B model using LoRA (Low-Rank Adaptation) on the Psychological Counseling Digital Twin Corpus (PsyDTCorpus) to build a professional psychological counseling dialogue model. The project integrates RAG (Retrieval-Augmented Generation) technology, combining a professional knowledge base (containing 5 psychology books) to retrieve relevant professional knowledge and enhance the professionalism and accuracy of model responses. The project includes complete training, evaluation, and comparison functionality, suitable for dialogue generation tasks in psychological counseling.
+This project specializes the Qwen3-4B model for psychological counseling by combining LoRA-based SFT style alignment (trained on the PsyDTCorpus multi-turn counseling dataset) with retrieval-augmented generation (RAG) that injects external professional references into the system prompt. The repository provides a complete pipeline for training, benchmark evaluation (PsychCounsel-Bench), and Base / LoRA / LoRA+RAG qualitative comparisons under practical resource constraints.
+
+## 📌 Paper-style Summary (for internship / research demonstration)
+
+- **Base model**: `Qwen/Qwen3-4B`
+- **SFT + LoRA (style alignment)**: `r=8`, `alpha=32`, `dropout=0.1`, `target_modules=["q_proj","k_proj","v_proj","o_proj"]`; `max_length=384`; 3 epochs; LR=2e-4; effective batch size=8
+- **RAG (knowledge grounding)**: 5 authoritative Chinese references; chunk_size=300, overlap=40; Embedding=`BAAI/bge-small-zh-v1.5`; FAISS; top-1 retrieval injected into the system prompt
+- **Quantitative results (PsychCounsel-Bench, 500 MCQ)**:
+  - Professional prompt: Base 80.60% (403/500); LoRA 79.60% (398/500)
+  - Simple prompt: Base 46.20% (231/500); LoRA 57.20% (286/500) (**+11.00pp**)
+- **Hardware (reproducibility)**: single RTX 4090D; in a representative comparison run, Base VRAM 7.49GB vs LoRA 7.50GB (LoRA overhead \(\sim\)5.9M params, \(\sim\)0.15%)
+
+> Note: `rag/knowledge_base/*.pdf` and `rag/vector_store/` are ignored by default via `.gitignore`. Prepare PDFs locally and run `rag/indexing.py` to build the FAISS index before using RAG.
 
 ## 🎯 Key Features
 
@@ -27,8 +39,7 @@ This project fine-tunes the Qwen3-4B model using LoRA (Low-Rank Adaptation) on t
 ```
 PsyDTCorpus/
 ├── model_origin/            # Original model related
-│   ├── Qwen3-4B/           # Qwen3-4B model files
-│   └── generate_text.py    # Text generation script
+│   └── generate_text.py    # Text generation script (base model example)
 ├── lora/                    # LoRA fine-tuning module
 │   ├── data/                # Dataset directory
 │   │   ├── PsyDTCorpus/    # PsyDTCorpus dataset
@@ -47,14 +58,12 @@ PsyDTCorpus/
     ├── indexing.py         # Build knowledge base vector index
     ├── retrieval.py        # Knowledge retriever
     ├── compare_all.py      # Three-model comparison script
-    ├── knowledge_base/     # Professional knowledge base (PDF files)
-    │   ├── CCMD-3中国精神障碍分类与诊断标准.pdf
-    │   ├── 中国心理学会临床与咨询心理学工作伦理守则解读.pdf
-    │   ├── 国家职业资格培训教程 心理咨询师 三级.pdf
-    │   ├── 心理咨询的理论与实务.pdf
-    │   └── 认知疗法基础与应用.pdf
+    ├── knowledge_base/     # Professional knowledge base (PDF files, local-only by default)
     └── vector_store/       # Vector storage directory
         └── psychology_db/  # FAISS vector database
+└── stats/                   # Dataset statistics scripts (for paper appendix)
+    ├── topic_distribution.py
+    └── conversation_statistics.py
 ```
 
 ## 🔧 Environment Requirements
@@ -113,6 +122,29 @@ pip install torch transformers>=4.51.0 datasets peft accelerate tqdm
 The dataset should be placed in the `data/PsyDTCorpus/` directory, containing the following files:
 - `PsyDTCorpus_train_mulit_turn_packing.json` - Training set
 - `PsyDTCorpus_test_single_turn_split.json` - Test set
+
+### Dataset Statistics (Training Split)
+
+Statistics below are computed by `stats/topic_distribution.py` and `stats/conversation_statistics.py` (character count uses Python `len()`):
+
+- **Samples**: 4,760 multi-turn conversations
+- **Topic distribution (normalizedTag)**:
+  - Marriage/Relationship (婚恋): 1,012 (21.26%)
+  - Emotion (情绪): 658 (13.82%)
+  - Interpersonal (人际): 648 (13.61%)
+  - Family (家庭): 510 (10.71%)
+  - Therapy (治疗): 485 (10.19%)
+  - Growth (成长): 374 (7.86%)
+  - Self (自我): 360 (7.56%)
+  - Behavior (行为): 350 (7.35%)
+  - Workplace (职场): 153 (3.21%)
+  - Society (社会): 120 (2.52%)
+  - Sexual Psychology (性心理): 56 (1.18%)
+  - Psychology Knowledge (心理学知识): 34 (0.71%)
+- **Conversation length (messages)**: avg 37.16; median 37; min 19; max 71
+- **Text length (characters)**:
+  - user avg 31.54; total 2,714,230 (35.22%)
+  - assistant avg 58.02; total 4,993,118 (64.78%)
 
 ### Dataset Format
 
@@ -864,6 +896,13 @@ Uses PsychCounsel-Bench for multiple-choice question evaluation:
    - Vector index will be saved in `rag/vector_store/psychology_db/` directory
    - If knowledge base is updated, need to rerun the index building script
    - RAG dependencies (langchain, faiss, etc.) are optional, only install when using RAG functionality
+
+8. **Knowledge base documents (prepared locally, not committed by default)**:
+   - *CCMD-3: Chinese Classification and Diagnostic Criteria of Mental Disorders (3rd Edition)*
+   - *Interpretation of the Code of Ethics for Clinical and Counseling Psychology Practice (Chinese Psychological Society)*
+   - *National Vocational Qualification Training Textbook: Psychological Counselor (Level 3, 2012 Revised Edition)*
+   - *Theory and Practice of Psychological Counseling*
+   - *Cognitive Therapy: Fundamentals and Applications (2nd Edition)*
 
 ## 📄 License
 
